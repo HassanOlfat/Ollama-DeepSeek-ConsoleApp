@@ -16,7 +16,8 @@ class Program
         Console.OutputEncoding = Encoding.UTF8;
         client.Timeout = TimeSpan.FromSeconds(30);
         var url = "http://localhost:11434/api/chat";
-
+        string prompt;
+        string modelResponse;
         while (true)
         {
             Console.Write("> ");
@@ -26,17 +27,26 @@ class Program
                 Console.WriteLine("bye");
                 break;
             }
+            if (userInput.Contains("زمان") || userInput.Contains("کی"))
+            {
+                 prompt = "به کاربر توضیح دهید که محاسبه بدهی او معمولاً ۷۲ ساعت طول می‌کشد و او باید منتظر بماند. پاسخ باید دوستانه و حرفه‌ای باشد.";
+                 modelResponse = await GetModelResponse(url, prompt);
+                Console.WriteLine(modelResponse);
+            }
+            else if (userInput.Contains("چقدر"))
+            {
+                string userId = ExtractUserId(userInput);
 
-            string userId = ExtractUserId(userInput); 
+                var payments = await GetUserPayments(userId);
 
-            var payments = await GetUserPayments(userId);
+                var totalDebt = payments.Where(p => p.IsPaid).Sum(p => p.PaidAmount);
 
-            var totalDebt = payments.Where(p => p.IsPaid).Sum(p => p.PaidAmount);
+                prompt = $"مجموع بدهی کاربر {totalDebt} است. یک پاسخ دوستانه به کاربر ارائه دهید.";
+                modelResponse = await GetModelResponse(url, prompt);
 
-            var prompt = $"مجموع بدهی کاربر {totalDebt} است. یک پاسخ دوستانه به کاربر ارائه دهید.";
-            var modelResponse = await GetModelResponse(url, prompt);
-
-            Console.WriteLine(modelResponse);
+                Console.WriteLine(modelResponse);
+            }
+          
         }
     }
 
@@ -99,6 +109,7 @@ where nationalId=@nationalId";
                 Console.WriteLine($"Error parsing JSON object: {ex.Message}");
             }
         }
+        aggregatedContent.Remove(0, aggregatedContent.ToString().IndexOf("</think>") + 8);
 
         return aggregatedContent.ToString().Trim();
     }
