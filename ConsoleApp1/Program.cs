@@ -27,33 +27,24 @@ class Program
                 break;
             }
 
-            // شناسایی کاربر (مثلاً از طریق userInput)
-            string userId = ExtractUserId(userInput); // این تابع باید شناسه کاربر را از ورودی استخراج کند
+            string userId = ExtractUserId(userInput); 
 
-            // دریافت داده‌های پرداختی کاربر
             var payments = await GetUserPayments(userId);
 
-            // محاسبه بدهی کاربر
             var totalDebt = payments.Where(p => p.IsPaid).Sum(p => p.PaidAmount);
 
-            // آماده‌سازی Prompt برای مدل زبانی
             var prompt = $"مجموع بدهی کاربر {totalDebt} است. یک پاسخ دوستانه به کاربر ارائه دهید.";
             var modelResponse = await GetModelResponse(url, prompt);
 
-            // نمایش پاسخ به کاربر
             Console.WriteLine(modelResponse);
         }
     }
 
-    // تابع برای استخراج شناسه کاربر از ورودی
     public static string ExtractUserId(string nationalId)
     {
-        // اینجا می‌توانید از منطق خاصی برای استخراج شناسه کاربر استفاده کنید
-        // مثلاً با استفاده از عبارات منظم (Regex) یا الگوهای خاص
-        return nationalId; // به عنوان مثال، شناسه کاربر ۱ را برمی‌گردانیم
+        return nationalId; 
     }
 
-    // تابع برای دریافت داده‌های پرداختی کاربر از پایگاه داده
     public static async Task<Payment[]> GetUserPayments(string nationalId)
     {
         string connectionString = "Server=.;Database=Spotbar_v2;Trusted_Connection=True;TrustServerCertificate=True;";
@@ -72,7 +63,6 @@ where nationalId=@nationalId";
         }
     }
 
-    // تابع برای ارسال درخواست به مدل زبانی
     public static async Task<string> GetModelResponse(string url, string prompt)
     {
         var payload = new
@@ -113,7 +103,6 @@ where nationalId=@nationalId";
         return aggregatedContent.ToString().Trim();
     }
 
-    // کلاس‌های مدل برای دسریالایز کردن داده‌ها
     public class Payment
     {
        public string NationalId { get; set; }
